@@ -1,0 +1,5 @@
+representation.Test:
+  - field1:
+    - path: /rss/channel/title
+  - field2:
+    - path: /rss/channel/description

@@ -1,5 +1,5 @@
 representation.Podcast:
-  - field1:
+  - title:
     - path: /rss/channel/title
-  - field2:
+  - description:
     - path: /rss/channel/description

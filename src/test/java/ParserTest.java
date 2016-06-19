@@ -1,5 +1,6 @@
 import com.esotericsoftware.yamlbeans.YamlException;
-import org.junit.Before;
+import exception.CannotChangeConfig;
+import exception.ValueNotFound;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -8,13 +9,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,14 +25,12 @@ public class ParserTest {
 
     private static HashMap nodes;
     private static final List<Map> fields = new ArrayList();
-    private static File testXmlFile;
+    private static final String xmlFileName = Parser.class.getClassLoader().getResource("test.xml").getFile();
 
     @BeforeClass
     public static void setUp() throws YamlException, CannotChangeConfig, FileNotFoundException {
         final FileReader yamlfile = new FileReader(Parser.class.getClassLoader().getResource("xmlconfig/test.yml").getFile());
         Parser.withYaml(yamlfile);
-
-        testXmlFile = new File(Parser.class.getClassLoader().getResource("test.xml").getFile());
 
         final Map<String, String> rule = new HashMap();
         rule.put("path", "/test/test");
@@ -70,7 +64,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testGetXmlValueByRuleByPath() throws SAXException, ParserConfigurationException, XPathExpressionException, IOException {
+    public void testGetXmlValueByPathRule() throws SAXException, ParserConfigurationException, XPathExpressionException, IOException, ValueNotFound {
         final Map<String, String> rule = new HashMap();
         rule.put("path", "/rss/channel/title");
 
@@ -79,7 +73,7 @@ public class ParserTest {
 
         dBuilder = dbFactory.newDocumentBuilder();
 
-        Document doc = dBuilder.parse(testXmlFile);
+        Document doc = dBuilder.parse(new FileInputStream(xmlFileName));
         doc.getDocumentElement().normalize();
 
         final String test = Parser.getValueByRule(rule, doc);
@@ -87,8 +81,42 @@ public class ParserTest {
     }
 
     @Test
+    public void testGetXmlValueByAttributeRule() throws SAXException, ParserConfigurationException, XPathExpressionException, IOException, ValueNotFound {
+        final Map<String, String> rule = new HashMap();
+        rule.put("path", "/rss/channel/description");
+        rule.put("attribute", "value");
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder;
+
+        dBuilder = dbFactory.newDocumentBuilder();
+
+        Document doc = dBuilder.parse(new FileInputStream(xmlFileName));
+        doc.getDocumentElement().normalize();
+
+        final String test = Parser.getValueByRule(rule, doc);
+        assertEquals("DescriptionInAttribute", test);
+    }
+
+    @Test(expected=ValueNotFound.class)
+    public void testThrowsValueNotFoundGetValueByRule() throws ParserConfigurationException, IOException, XPathExpressionException, SAXException, ValueNotFound {
+        final Map<String, String> rule = new HashMap();
+        rule.put("path", "/rss/channel/bla");
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder;
+
+        dBuilder = dbFactory.newDocumentBuilder();
+
+        Document doc = dBuilder.parse(new FileInputStream(xmlFileName));
+        doc.getDocumentElement().normalize();
+
+        final String test = Parser.getValueByRule(rule, doc);
+    }
+
+    @Test
     public void testParse() throws ClassNotFoundException, SAXException, IllegalAccessException, IOException, XPathExpressionException, InstantiationException, ParserConfigurationException {
-        List<Object> list = Parser.parse(testXmlFile);
+        List<Object> list = Parser.parse(new FileInputStream(xmlFileName));
         assertNotNull(list);
     }
 }

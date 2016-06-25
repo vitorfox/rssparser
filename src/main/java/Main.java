@@ -1,14 +1,14 @@
 import com.esotericsoftware.yamlbeans.YamlException;
+import com.esotericsoftware.yamlbeans.YamlReader;
+import config.XmlConfig;
 import exception.CannotChangeConfig;
-import org.xml.sax.SAXException;
+import model.Episode;
+import model.Podcast;
+import org.javalite.activejdbc.Base;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -17,46 +17,50 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         System.out.println("Rodandoam!! :D");
-        FileReader yamlfile = null;
+        XmlConfig xmlConfig = null;
         try {
             URL filePath = Parser.class.getClassLoader().getResource("xmlconfig/parser.yml");
             if (filePath == null) {
                 throw new FileNotFoundException();
             }
-            yamlfile = new FileReader(filePath.getFile());
+            FileReader yamlfile = new FileReader(filePath.getFile());
+            YamlReader reader = new YamlReader(yamlfile);
+            xmlConfig = reader.read(XmlConfig.class);
         } catch (FileNotFoundException e) {
             System.out.println("No config file found" + e.toString());
             System.exit(1);
-        }
-
-        try {
-            Parser.withYaml(yamlfile);
-        } catch (CannotChangeConfig cannotChangeConfig) {
-            System.out.println("Config already set");
         } catch (YamlException e) {
             System.out.println("Failed to load config" + e.toString());
             System.exit(1);
         }
 
         try {
-            URL url = new URL("https://jovemnerd.com.br/categoria/nerdcast/feed/");
-            InputStream stream = url.openStream();
+            Parser.withConfig(xmlConfig);
+        } catch (CannotChangeConfig cannotChangeConfig) {
+            System.out.println("Config already set");
+        }
+
+        //Load list of podcasts;
+        Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost/flycast_test", "postgres", "postgres");
+        final int minutesFromLastCheck = 1;
+        final int podcastsCountLimit = 10;
+        List<Podcast> podcasts = new Podcast().toGetFromFeed(minutesFromLastCheck, podcastsCountLimit);
+        Base.close();
+
+        try {
+
+            //URL url = new URL("https://jovemnerd.com.br/categoria/nerdcast/feed/");
+            //InputStream stream = url.openStream();
+
+            String xmlFileName = Parser.class.getClassLoader().getResource("jovemnerd.xml").getFile();
+            FileInputStream stream = new FileInputStream(xmlFileName);
+
+            Instant start = Instant.now();
+
             List nodes = Parser.parse(stream);
-            System.out.print(nodes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
+
+        } catch (Exception e) {
+            //next podcast
         }
 
     }

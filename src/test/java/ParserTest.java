@@ -1,20 +1,27 @@
-import com.esotericsoftware.yamlbeans.YamlException;
+import com.esotericsoftware.yamlbeans.YamlReader;
+import config.XmlConfig;
+import config.XmlConfigNode;
+import config.XmlConfigRule;
 import exception.CannotChangeConfig;
+import exception.InstanceTypeNotAvailable;
 import exception.ValueNotFound;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.xml.xpath.XPathFactory;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -23,100 +30,70 @@ import static org.junit.Assert.*;
  */
 public class ParserTest {
 
-    private static HashMap nodes;
-    private static final List<Map> fields = new ArrayList();
     private static final String xmlFileName = Parser.class.getClassLoader().getResource("test.xml").getFile();
+    private static XmlConfig xmlConfig;
+    private static Document doc;
+    private static final XPath xPath = XPathFactory.newInstance().newXPath();
 
     @BeforeClass
-    public static void setUp() throws YamlException, CannotChangeConfig, FileNotFoundException {
-        final FileReader yamlfile = new FileReader(Parser.class.getClassLoader().getResource("xmlconfig/test.yml").getFile());
-        Parser.withYaml(yamlfile);
+    public static void setUp() throws IOException, CannotChangeConfig, ParserConfigurationException, SAXException {
+        final FileReader yamlfile = new FileReader(Parser.class.getClassLoader().getResource("xmlconfig/xmlconfig.yml").getFile());
+        final YamlReader reader = new YamlReader(yamlfile);
+        xmlConfig = reader.read(XmlConfig.class);
+        Parser.withConfig(xmlConfig);
 
-        final Map<String, String> rule = new HashMap();
-        rule.put("path", "/test/test");
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder;
+        dBuilder = dbFactory.newDocumentBuilder();
 
-        List rules = new ArrayList();
-        rules.add(rule);
-
-        final Map<String, List> field1 = new HashMap();
-        field1.put("field1", rules);
-
-        final Map<String, List> field2 = new HashMap();
-        field2.put("field2", rules);
-
-        fields.add(field1);
-        fields.add(field2);
-
-        nodes = new HashMap();
-        nodes.put("Test", fields);
-    }
-
-    @Test
-    public void testGetHashMapByClassName() {
-        final List test = Parser.getNodeByClass(representation.Test.class, nodes);
-        assertTrue(((HashMap) test.get(0)).containsKey("field1"));
+        doc = dBuilder.parse(new FileInputStream(xmlFileName));
+        doc.getDocumentElement().normalize();
     }
 
     @Test
     public void testGetRulesForFields() {
-        final List test = Parser.getRuleByField("field1", fields);
-        assertTrue(((Map) test.get(0)).containsKey("path"));
+        final List<XmlConfigRule> rules = Parser.getRulesByField("field1", xmlConfig.nodes.get(0).fields);
+        assertEquals("title", rules.get(0).path);
     }
 
     @Test
     public void testGetXmlValueByPathRule() throws SAXException, ParserConfigurationException, XPathExpressionException, IOException, ValueNotFound {
-        final Map<String, String> rule = new HashMap();
-        rule.put("path", "/rss/channel/title");
-
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder;
-
-        dBuilder = dbFactory.newDocumentBuilder();
-
-        Document doc = dBuilder.parse(new FileInputStream(xmlFileName));
-        doc.getDocumentElement().normalize();
-
-        final String test = Parser.getValueByRule(rule, doc);
+        final XmlConfigNode node = xmlConfig.nodes.get(0);
+        final XmlConfigRule rule = node.fields.get(0).rules.get(0);
+        final NodeList nodeList = (NodeList) xPath.compile(node.basePath).evaluate(doc, XPathConstants.NODESET);
+        final String test = Parser.getValueByRule(rule, nodeList.item(0).getChildNodes());
         assertEquals("TitleTest", test);
     }
 
     @Test
     public void testGetXmlValueByAttributeRule() throws SAXException, ParserConfigurationException, XPathExpressionException, IOException, ValueNotFound {
-        final Map<String, String> rule = new HashMap();
-        rule.put("path", "/rss/channel/description");
-        rule.put("attribute", "value");
-
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder;
-
-        dBuilder = dbFactory.newDocumentBuilder();
-
-        Document doc = dBuilder.parse(new FileInputStream(xmlFileName));
-        doc.getDocumentElement().normalize();
-
-        final String test = Parser.getValueByRule(rule, doc);
+        final XmlConfigNode node = xmlConfig.nodes.get(0);
+        final XmlConfigRule rule = node.fields.get(1).rules.get(0);
+        final NodeList nodeList = (NodeList) xPath.compile(node.basePath).evaluate(doc, XPathConstants.NODESET);
+        final String test = Parser.getValueByRule(rule, nodeList.item(0).getChildNodes());
         assertEquals("DescriptionInAttribute", test);
     }
 
     @Test(expected=ValueNotFound.class)
     public void testThrowsValueNotFoundGetValueByRule() throws ParserConfigurationException, IOException, XPathExpressionException, SAXException, ValueNotFound {
-        final Map<String, String> rule = new HashMap();
-        rule.put("path", "/rss/channel/bla");
+        final XmlConfigRule rule = new XmlConfigRule();
+        rule.path = "/bla";
 
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder;
+        final NodeList nodeList = (NodeList) xPath.compile("/rss/channel").evaluate(doc, XPathConstants.NODESET);
+        final String test = Parser.getValueByRule(rule, nodeList.item(0).getChildNodes());
+    }
 
-        dBuilder = dbFactory.newDocumentBuilder();
-
-        Document doc = dBuilder.parse(new FileInputStream(xmlFileName));
-        doc.getDocumentElement().normalize();
-
-        final String test = Parser.getValueByRule(rule, doc);
+    @Test
+    public void testGetInstances() throws XPathExpressionException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        final XmlConfigNode node = xmlConfig.nodes.get(0);
+        List<Representation> instances = Parser.getInstances(doc, node);
+        assertEquals(Representation.class, instances.get(0).getClass());
     }
 
     @Test
     public void testParse() throws ClassNotFoundException, SAXException, IllegalAccessException, IOException, XPathExpressionException, InstantiationException, ParserConfigurationException {
-        List<Object> list = Parser.parse(new FileInputStream(xmlFileName));
-        assertNotNull(list);
+        List<Representation> list = Parser.parse(new FileInputStream(xmlFileName));
+        assertEquals("TitleTest", list.get(0).get("field1"));
+        assertEquals("Item1", list.get(1).get("field1"));
     }
 }

@@ -1,5 +1,90 @@
-representation.Podcast:
-  - title:
-    - path: /rss/channel/title
-  - description:
-    - path: /rss/channel/description
+nodes:
+  - !config.XmlConfigNode
+    className: representation.Podcast
+    basePath: /rss/channel
+    fields:
+      - !config.XmlConfigField
+        name: title
+        rules:
+          - !config.XmlConfigRule
+            path: ./title
+      - !config.XmlConfigField
+        name: description
+        rules:
+          - !config.XmlConfigRule
+            path: ./description
+      - !config.XmlConfigField
+        name: lastBuildDate
+        rules:
+          - !config.XmlConfigRule
+            path: ./pubDate
+          - !config.XmlConfigRule
+            path: ./lastBuildDate
+      - !config.XmlConfigField
+        name: imageUrl
+        rules:
+          - !config.XmlConfigRule
+            path: ./image/href
+          - !config.XmlConfigRule
+            path: ./thumbnail/href
+          - !config.XmlConfigRule
+            path: ./image/url
+          - !config.XmlConfigRule
+            path: ./image
+          - !config.XmlConfigRule
+            path: ./thumbnail
+
+  - !config.XmlConfigNode
+    className: representation.model.Episode
+    basePath: /rss/channel/item
+    fields:
+      - !config.XmlConfigField
+        name: title
+        rules:
+          - !config.XmlConfigRule
+            path: ./title
+      - !config.XmlConfigField
+        name: pubDate
+        rules:
+          - !config.XmlConfigRule
+            path: ./pubDate
+      - !config.XmlConfigField
+        name: description
+        rules:
+          - !config.XmlConfigRule
+            path: ./description
+      - !config.XmlConfigField
+        name: duration
+        rules:
+          - !config.XmlConfigRule
+            path: ./content
+            attribute: duration
+          - !config.XmlConfigRule
+            path: ./duration
+      - !config.XmlConfigField
+        name: fileUrl
+        rules:
+          - !config.XmlConfigRule
+            path: ./content
+            attribute: url
+          - !config.XmlConfigRule
+            path: ./enclosure
+            attribute: url
+      - !config.XmlConfigField
+        name: fileSize
+        rules:
+          - !config.XmlConfigRule
+            path: ./content
+            attribute: fileSize
+          - !config.XmlConfigRule
+            path: ./enclosure
+            attribute: length
+      - !config.XmlConfigField
+        name: fileType
+        rules:
+          - !config.XmlConfigRule
+            path: ./content
+            attribute: type
+          - !config.XmlConfigRule
+            path: ./enclosure
+            attribute: type

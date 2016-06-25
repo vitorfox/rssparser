@@ -2,14 +2,28 @@ group 'com.vteixeira'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'org.javalite.activejdbc'
 
-sourceCompatibility = 1.5
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'http://repo.javalite.io/' }
+    }
+    dependencies {
+        classpath group: 'org.javalite', name: 'activejdbc-gradle-plugin', version: '1.4.12-SNAPSHOT'
+    }
+}
 
 repositories {
     mavenCentral()
+    maven { url 'http://repo.javalite.io/' }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
     compile 'com.esotericsoftware.yamlbeans:yamlbeans:1.09'
+    compile 'org.postgresql:postgresql:9.4.1208.jre7'
+    compile group: 'org.javalite', name: 'activejdbc-gradle-plugin', version: '1.4.12-SNAPSHOT'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.5'
+    compile group: 'com.ximpleware', name: 'vtd-xml', version: '2.13'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
 }

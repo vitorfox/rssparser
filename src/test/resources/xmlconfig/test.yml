@@ -1,8 +1,0 @@
-representation.Test:
-  - field1:
-    - path: /rss/channel/title
-  - field2:
-    - path: /rss/channel/description
-  - field3:
-    - path: /rss/channel/lastPubDate
-    - path: /rss/channel/lastBuildDate

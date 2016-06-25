@@ -19,8 +19,11 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="rssparser_main" target="1.5" />
-      <module name="rssparser_test" target="1.5" />
+      <module name="rssparser_main" target="1.8" />
+      <module name="rssparser_test" target="1.8" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="DEBUGGING_INFO" value="false" />
   </component>
 </project>

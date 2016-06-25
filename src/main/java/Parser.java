@@ -1,12 +1,16 @@
-import com.esotericsoftware.yamlbeans.YamlException;
-import com.esotericsoftware.yamlbeans.YamlReader;
+import config.XmlConfig;
+import config.XmlConfigField;
+import config.XmlConfigNode;
+import config.XmlConfigRule;
 import exception.CannotChangeConfig;
+import exception.InstanceTypeNotAvailable;
 import exception.ValueNotFound;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import representation.Node;
 
+import javax.lang.model.type.NullType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -14,11 +18,10 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by vitorteixeira on 6/8/16.
@@ -27,97 +30,92 @@ import java.util.*;
 
 public final class Parser {
 
-    private static Map<String, Object> map;
+    private static XmlConfig xmlConfig;
     private static final XPath xPath = XPathFactory.newInstance().newXPath();
-    private static final String PATH = "path";
-    private static final String ATTRIBUTE = "attribute";
+    private static final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
     private Parser() {}
 
-    public static void withYaml(FileReader yamlFile) throws CannotChangeConfig, YamlException {
-        if (map != null) throw new CannotChangeConfig();
-
-        final YamlReader reader = new YamlReader(yamlFile);
-
-        map = (Map) reader.read();
+    public static void withConfig(XmlConfig lxmlConfig) throws CannotChangeConfig {
+        if (xmlConfig != null) throw new CannotChangeConfig();
+        xmlConfig = lxmlConfig;
     }
 
-    protected static ArrayList getNodeByClass(Class nodeClass, HashMap config) {
-        ArrayList node = (ArrayList) config.get(nodeClass.getSimpleName());
-        return node;
-    }
+    public static List<XmlConfigRule> getRulesByField(String field, List<XmlConfigField> fields) {
 
-    public static List getRuleByField(String field, List<Map> fields) {
-
-        for (Map<String, List> lfield: fields) {
-            if (lfield.get(field) != null) {
-                return lfield.get(field);
+        for (int i = 0; i < fields.size(); i++) {
+            if (field.equals(fields.get(i).name)) {
+                return fields.get(i).rules;
             }
         }
 
         return new ArrayList();
     }
 
-    public static String getValueByRule(Map<String, String> rule, Document doc) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException, ValueNotFound {
+    public static String getValueByRule(XmlConfigRule rule, NodeList nodeList) throws ValueNotFound, ParserConfigurationException {
 
-        String value = null;
-
-        NodeList nodeList;
-
-        if (rule.containsKey(PATH)) {
-            String expression = rule.get(PATH);
-            nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                if (rule.containsKey(ATTRIBUTE)) {
-                    value = nodeList.item(i).getAttributes().getNamedItem(rule.get(ATTRIBUTE)).getNodeValue();
-                } else {
-                    value = nodeList.item(i).getTextContent();
-                }
+        try {
+            String value = null;
+            Node item = (Node) xPath.compile(rule.path).evaluate(nodeList, XPathConstants.NODE);
+            if (item == null) {
+                throw new Exception();
             }
+            if (rule.attribute != null) {
+                if (item.hasAttributes()) {
+                    value = item.getAttributes().getNamedItem(rule.attribute).getNodeValue();
+                }
+            } else {
+                value = item.getTextContent();
+            }
+            return value;
+        } catch (Exception e) {
+            throw new ValueNotFound();
         }
-        if (value == null) throw new ValueNotFound();
-        return value;
     }
 
-    public static List<Object> parse(InputStream xmlFile) throws ClassNotFoundException, ParserConfigurationException, IOException, SAXException, XPathExpressionException, IllegalAccessException, InstantiationException {
+    public static List<Representation> parse(InputStream xmlFile) throws ClassNotFoundException, ParserConfigurationException, IOException, SAXException, XPathExpressionException, IllegalAccessException, InstantiationException {
 
-        ArrayList<Object> response = new ArrayList<Object>();
+        List<Representation> response = new ArrayList<Representation>();
 
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder;
-
-        dBuilder = dbFactory.newDocumentBuilder();
-
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(xmlFile);
-        doc.getDocumentElement().normalize();
 
-        Iterator it = map.entrySet().iterator();
+        for(int i = 0; i < xmlConfig.nodes.size(); i++) {
+            XmlConfigNode node = xmlConfig.nodes.get(i);
 
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            Class<?> nodeClass = Class.forName((String) pair.getKey());
-
-            Node node = (Node) nodeClass.newInstance();
-
-            Field[] fields = nodeClass.getDeclaredFields();
-
-            for (Field field: fields) {
-                List rules = Parser.getRuleByField(field.getName(), (List<Map>) pair.getValue());
-                for (Object rule: rules) {
-                    try {
-                        String value = Parser.getValueByRule((Map<String, String>) rule, doc);
-                        node.set(field, value);
-                        break;
-                    } catch (ValueNotFound valueNotFound) {
-                        valueNotFound.printStackTrace();
-                    }
-                }
-            }
-
-            response.add(node);
-            it.remove(); // avoids a ConcurrentModificationException
+            List<Representation> representationInstance = getInstances(doc, node);
+            response.addAll(representationInstance);
         }
 
         return response;
     }
+
+    public static List<Representation> getInstances(Document doc, XmlConfigNode node) throws IllegalAccessException, InstantiationException, XPathExpressionException {
+        List<Representation> response = new ArrayList<>();
+        final List<XmlConfigField> fields = node.fields;
+
+        final NodeList nodeList = (NodeList) xPath.compile(node.basePath).evaluate(doc, XPathConstants.NODESET);
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            NodeList itemNodeList = (NodeList) nodeList.item(i);
+            Representation representationInstance = new Representation(node.className);
+            for (int j = 0; j < fields.size(); j++) {
+                XmlConfigField field = fields.get(j);
+                List<XmlConfigRule> rules = Parser.getRulesByField(field.name, node.fields);
+                for (int k = 0; k < rules.size(); k++) {
+                    XmlConfigRule rule = rules.get(k);
+                    try {
+                        String value = Parser.getValueByRule(rule, itemNodeList);
+                        representationInstance.set(field.name, value);
+                        break;
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+            response.add(representationInstance);
+        }
+        return response;
+    }
+
 }

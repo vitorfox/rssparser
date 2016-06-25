@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module external.linked.project.id="rssparser:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="com.vteixeira" external.system.module.type="sourceSet" external.system.module.version="1.0-SNAPSHOT" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/../../build/classes/main" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../src/main">
@@ -10,5 +10,13 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: com.esotericsoftware.yamlbeans:yamlbeans:1.09" level="project" />
+    <orderEntry type="library" name="Gradle: org.postgresql:postgresql:9.4.1208.jre7" level="project" />
+    <orderEntry type="library" name="Gradle: org.javalite:activejdbc-gradle-plugin:1.4.12-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Gradle: org.slf4j:slf4j-simple:1.7.5" level="project" />
+    <orderEntry type="library" name="Gradle: com.ximpleware:vtd-xml:2.13" level="project" />
+    <orderEntry type="library" name="Gradle: org.javalite:activejdbc:1.4.11" level="project" />
+    <orderEntry type="library" name="Gradle: org.javalite:activejdbc-instrumentation:1.4.11" level="project" />
+    <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:1.7.5" level="project" />
+    <orderEntry type="library" name="Gradle: org.javalite:javalite-common:1.4.11" level="project" />
   </component>
 </module>

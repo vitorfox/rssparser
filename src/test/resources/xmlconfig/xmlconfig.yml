@@ -1,0 +1,32 @@
+nodes:
+  - !config.XmlConfigNode
+    className: representation.Item
+    basePath: /rss/channel
+    fields:
+      - !config.XmlConfigField
+        name: field1
+        rules:
+          - !config.XmlConfigRule
+            path: title
+      - !config.XmlConfigField
+        name: field2
+        rules:
+          - !config.XmlConfigRule
+            path: description
+            attribute: value
+      - !config.XmlConfigField
+        name: field3
+        rules:
+          - !config.XmlConfigRule
+            path: lastPubDate
+          - !config.XmlConfigRule
+            path: lastBuildDate
+  - !config.XmlConfigNode
+    className: representation.SubItem
+    basePath: /rss/channel/item
+    fields:
+      - !config.XmlConfigField
+        name: field1
+        rules:
+          - !config.XmlConfigRule
+            path: title

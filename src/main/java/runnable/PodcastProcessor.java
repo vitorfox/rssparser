@@ -40,25 +40,19 @@ public class PodcastProcessor implements Runnable {
     public void run() {
 
         logger.debug("Processing " + podcast.getString("feed_url"));
-        List<Representation> nodes = null;
+
         try {
+            List<Representation> nodes = null;
             URL url = new URL(podcast.getString("feed_url"));
             InputStream stream = url.openStream();
             nodes = Parser.parse(stream);
+            processEpisodes(nodes);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Trying to process " + podcast.getString("feed_url"));
+            logger.error("Error message: " + e.getMessage());
         }
 
         new DB("default").open();
-
-        if (nodes != null ) {
-            try {
-                processEpisodes(nodes);
-            } catch (Exception e) {
-                logger.error("Trying to process " + podcast.getString("feed_url"));
-                e.printStackTrace();
-            }
-        }
 
         saveUpdater();
 

@@ -127,9 +127,7 @@ public final class Parser {
                         String value = Parser.getValueByRule(rule, itemNodeList);
                         representationInstance.set(field.name, value);
                         break;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    } catch (Exception e) {}
                 }
             }
             response.add(representationInstance);

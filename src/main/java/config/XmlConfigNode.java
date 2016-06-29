@@ -3,7 +3,7 @@ package config;
 import java.util.List;
 
 public class XmlConfigNode {
-    public String className;
+    public String name;
     public String basePath;
     public List<XmlConfigField> fields;
 }

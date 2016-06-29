@@ -1,6 +1,6 @@
 nodes:
   - !config.XmlConfigNode
-    className: representation.Podcast
+    name: Podcast
     basePath: /rss/channel
     fields:
       - !config.XmlConfigField
@@ -14,14 +14,14 @@ nodes:
           - !config.XmlConfigRule
             path: ./description
       - !config.XmlConfigField
-        name: lastBuildDate
+        name: last_build_date
         rules:
           - !config.XmlConfigRule
             path: ./pubDate
           - !config.XmlConfigRule
             path: ./lastBuildDate
       - !config.XmlConfigField
-        name: imageUrl
+        name: image_url
         rules:
           - !config.XmlConfigRule
             path: ./image/href
@@ -35,7 +35,7 @@ nodes:
             path: ./thumbnail
 
   - !config.XmlConfigNode
-    className: representation.model.Episode
+    name: Episode
     basePath: /rss/channel/item
     fields:
       - !config.XmlConfigField
@@ -44,7 +44,7 @@ nodes:
           - !config.XmlConfigRule
             path: ./title
       - !config.XmlConfigField
-        name: pubDate
+        name: pub_date
         rules:
           - !config.XmlConfigRule
             path: ./pubDate
@@ -62,7 +62,7 @@ nodes:
           - !config.XmlConfigRule
             path: ./duration
       - !config.XmlConfigField
-        name: fileUrl
+        name: file_url
         rules:
           - !config.XmlConfigRule
             path: ./content
@@ -71,7 +71,7 @@ nodes:
             path: ./enclosure
             attribute: url
       - !config.XmlConfigField
-        name: fileSize
+        name: file_size
         rules:
           - !config.XmlConfigRule
             path: ./content
@@ -80,7 +80,7 @@ nodes:
             path: ./enclosure
             attribute: length
       - !config.XmlConfigField
-        name: fileType
+        name: file_type
         rules:
           - !config.XmlConfigRule
             path: ./content

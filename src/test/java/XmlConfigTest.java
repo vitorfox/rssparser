@@ -30,7 +30,7 @@ public class XmlConfigTest {
 
     @Test
     public void testGetNodeClassName() {
-        assertEquals("representation.Item", xmlConfig.nodes.get(0).className);
+        assertEquals("Item", xmlConfig.nodes.get(0).name);
     }
 
     @Test

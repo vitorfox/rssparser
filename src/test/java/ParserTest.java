@@ -1,9 +1,10 @@
+import app.Parser;
+import app.Representation;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import config.XmlConfig;
 import config.XmlConfigNode;
 import config.XmlConfigRule;
 import exception.CannotChangeConfig;
-import exception.InstanceTypeNotAvailable;
 import exception.ValueNotFound;
 import org.junit.BeforeClass;
 import org.junit.Test;

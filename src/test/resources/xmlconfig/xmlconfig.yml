@@ -1,6 +1,6 @@
 nodes:
   - !config.XmlConfigNode
-    className: representation.Item
+    name: Item
     basePath: /rss/channel
     fields:
       - !config.XmlConfigField
@@ -22,7 +22,7 @@ nodes:
           - !config.XmlConfigRule
             path: lastBuildDate
   - !config.XmlConfigNode
-    className: representation.SubItem
+    name: SubItem
     basePath: /rss/channel/item
     fields:
       - !config.XmlConfigField

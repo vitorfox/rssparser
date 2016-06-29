@@ -26,11 +26,16 @@ public class Episode extends Model{
         }
     }
     public void setDuration(String duration) {
+        char[] format = "00:00:00".toCharArray();
+
+        for (int i = 0; i < duration.length(); i++){
+            format[format.length - 1 -i] = duration.charAt(duration.length() - 1 -i);
+        }
         try {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = null;
-            date = dateFormat.parse(duration);
+            date = dateFormat.parse(new String(format));
             long seconds = date.getTime() / 1000L;
             set("duration", seconds);
         } catch (ParseException e) {

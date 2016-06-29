@@ -41,6 +41,8 @@ public class PodcastProcessor implements Runnable {
 
         logger.debug("Processing " + podcast.getString("feed_url"));
 
+        new DB("default").open();
+
         try {
             List<Representation> nodes = null;
             URL url = new URL(podcast.getString("feed_url"));
@@ -51,8 +53,6 @@ public class PodcastProcessor implements Runnable {
             logger.error("Trying to process " + podcast.getString("feed_url"));
             logger.error("Error message: " + e.getMessage());
         }
-
-        new DB("default").open();
 
         saveUpdater();
 

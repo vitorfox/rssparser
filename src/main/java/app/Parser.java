@@ -9,7 +9,9 @@ import exception.ValueNotFound;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,12 +35,30 @@ public final class Parser {
     private static XmlConfig xmlConfig;
     private static final XPath xPath = XPathFactory.newInstance().newXPath();
     private static final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+    private static DocumentBuilder dBuilder;
 
     private Parser() {}
 
-    public static void withConfig(XmlConfig lxmlConfig) throws CannotChangeConfig {
+    public static void withConfig(XmlConfig lxmlConfig) throws CannotChangeConfig, ParserConfigurationException {
         if (xmlConfig != null) throw new CannotChangeConfig();
         xmlConfig = lxmlConfig;
+
+        dBuilder = dbFactory.newDocumentBuilder();
+
+        dBuilder.setErrorHandler(new ErrorHandler() {
+            @Override
+            public void warning(SAXParseException e) throws SAXException {}
+
+            @Override
+            public void fatalError(SAXParseException e) throws SAXException {
+                throw e;
+            }
+
+            @Override
+            public void error(SAXParseException e) throws SAXException {
+                throw e;
+            }
+        });
     }
 
     public static List<XmlConfigRule> getRulesByField(String field, List<XmlConfigField> fields) {
@@ -77,7 +97,6 @@ public final class Parser {
 
         List<Representation> response = new ArrayList<Representation>();
 
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(xmlFile);
 
         for(int i = 0; i < xmlConfig.nodes.size(); i++) {
@@ -109,7 +128,7 @@ public final class Parser {
                         representationInstance.set(field.name, value);
                         break;
                     } catch (Exception e) {
-
+                        e.printStackTrace();
                     }
                 }
             }

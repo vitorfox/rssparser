@@ -47,6 +47,7 @@ public class PodcastProcessor implements Runnable {
             List<Representation> nodes = null;
             URL url = new URL(podcast.getString("feed_url"));
             InputStream stream = url.openStream();
+
             nodes = Parser.parse(stream);
             processEpisodes(nodes);
         } catch (Exception e) {

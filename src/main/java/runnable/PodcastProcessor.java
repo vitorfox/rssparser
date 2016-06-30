@@ -52,8 +52,7 @@ public class PodcastProcessor implements Runnable {
             processEpisodes(nodes);
         } catch (Exception e) {
             logger.error("Trying to process " + podcast.getString("feed_url"));
-            logger.error("Error message: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Exception:", e);
         }
 
         saveUpdater();
@@ -87,8 +86,7 @@ public class PodcastProcessor implements Runnable {
                                     dbEpisode.saveIt();
                                 } catch (Exception e) {
                                     logger.error("Trying to save episode " + dbEpisode.getId().toString());
-                                    logger.error("Error message: " + e.getMessage());
-                                    e.printStackTrace();
+                                    logger.error("Exception:", e);
                                 }
                             }
                             continue episode_loop;
@@ -99,14 +97,12 @@ public class PodcastProcessor implements Runnable {
                         episode.saveIt();
                     } catch (Exception e) {
                         logger.error("Trying to save episode " + episode.getString("file_url"));
-                        logger.error("Error message: " + e.getMessage());
-                        e.getStackTrace();
+                        logger.error("Exception:", e);
                     }
                 }
             } catch (Exception e) {
                 logger.error("Trying node " + j + " of podcast " + podcast.getId());
-                logger.error(e.getMessage());
-                e.getStackTrace();
+                logger.error("Exception:", e);
             }
         }
 

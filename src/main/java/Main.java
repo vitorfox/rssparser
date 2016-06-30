@@ -53,7 +53,7 @@ public class Main {
         } catch (CannotChangeConfig cannotChangeConfig) {
             logger.info("Config already set");
         } catch (ParserConfigurationException e) {
-            logger.error(e.getMessage());
+            logger.error("Exception:", e);
             System.exit(1);
         }
 

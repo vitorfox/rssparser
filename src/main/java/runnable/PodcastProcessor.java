@@ -39,7 +39,7 @@ public class PodcastProcessor implements Runnable {
     @Override
     public void run() {
 
-        logger.debug("Processing " + podcast.getString("feed_url"));
+        logger.info("Processing " + podcast.getString("feed_url"));
 
         new DB("default").open();
 
@@ -96,12 +96,12 @@ public class PodcastProcessor implements Runnable {
                     try {
                         episode.saveIt();
                     } catch (Exception e) {
-                        logger.error("Trying to save episode " + episode.getString("file_url"));
+                        logger.error("Trying to save episode " + episode.getString("file_url") + " of podcast " + podcast.getString("feed_url"));
                         logger.error("Exception:", e);
                     }
                 }
             } catch (Exception e) {
-                logger.error("Trying node " + j + " of podcast " + podcast.getId());
+                logger.error("Trying node " + j + " of podcast " + podcast.getString("feed_url"));
                 logger.error("Exception:", e);
             }
         }

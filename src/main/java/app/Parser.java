@@ -65,6 +65,8 @@ public final class Parser {
             if (rule.attribute != null) {
                 if (item.hasAttributes()) {
                     value = item.getAttributes().getNamedItem(rule.attribute).getNodeValue();
+                } else {
+                    throw new ValueNotFound();
                 }
             } else {
                 value = item.getTextContent();

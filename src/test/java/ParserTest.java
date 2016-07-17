@@ -84,6 +84,27 @@ public class ParserTest {
         final String test = Parser.getValueByRule(rule, nodeList.item(0).getChildNodes());
     }
 
+
+    @Test(expected=ValueNotFound.class)
+    public void testThrowsValueNotFoundWhenHasPathButNoAttr() throws ParserConfigurationException, IOException, XPathExpressionException, SAXException, ValueNotFound {
+        final XmlConfigRule rule = new XmlConfigRule();
+        rule.path = "./lastBuildDate";
+        rule.attribute = "test";
+
+        final NodeList nodeList = (NodeList) xPath.compile("/rss/channel").evaluate(doc, XPathConstants.NODESET);
+        final String test = Parser.getValueByRule(rule, nodeList.item(0).getChildNodes());
+    }
+
+    @Test(expected=ValueNotFound.class)
+    public void testThrowsValueNotFoundWhenHasPathButNoSpecifiedAttr() throws ParserConfigurationException, IOException, XPathExpressionException, SAXException, ValueNotFound {
+        final XmlConfigRule rule = new XmlConfigRule();
+        rule.path = "./testPathWithAttrs";
+        rule.attribute = "test";
+
+        final NodeList nodeList = (NodeList) xPath.compile("/rss/channel").evaluate(doc, XPathConstants.NODESET);
+        final String test = Parser.getValueByRule(rule, nodeList.item(0).getChildNodes());
+    }
+
     @Test
     public void testGetInstances() throws XPathExpressionException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         final XmlConfigNode node = xmlConfig.nodes.get(0);

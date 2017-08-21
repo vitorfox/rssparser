@@ -8,31 +8,40 @@ nodes:
         rules:
           - !config.XmlConfigRule
             path: ./title
+            priority: 0
       - !config.XmlConfigField
         name: description
         rules:
           - !config.XmlConfigRule
             path: ./description
+            priority: 0
       - !config.XmlConfigField
         name: last_build_date
         rules:
           - !config.XmlConfigRule
             path: ./pubDate
+            priority: 0
           - !config.XmlConfigRule
             path: ./lastBuildDate
+            priority: 1
       - !config.XmlConfigField
         name: image_url
         rules:
           - !config.XmlConfigRule
             path: ./image/href
+            priority: 0
           - !config.XmlConfigRule
             path: ./thumbnail/href
+            priority: 1
           - !config.XmlConfigRule
             path: ./image/url
+            priority: 2
           - !config.XmlConfigRule
             path: ./image
+            priority: 4
           - !config.XmlConfigRule
             path: ./thumbnail
+            priority: 5
 
   - !config.XmlConfigNode
     name: Episode
@@ -43,48 +52,59 @@ nodes:
         rules:
           - !config.XmlConfigRule
             path: ./title
+            priority: 0
       - !config.XmlConfigField
         name: pub_date
         rules:
           - !config.XmlConfigRule
             path: ./pubDate
+            priority: 0
       - !config.XmlConfigField
         name: description
         rules:
           - !config.XmlConfigRule
             path: ./description
+            priority: 0
       - !config.XmlConfigField
         name: duration
         rules:
           - !config.XmlConfigRule
             path: ./content
             attribute: duration
+            priority: 0
           - !config.XmlConfigRule
             path: ./duration
+            priority: 0
       - !config.XmlConfigField
         name: file_url
         rules:
           - !config.XmlConfigRule
             path: ./content
             attribute: url
+            priority: 0
           - !config.XmlConfigRule
             path: ./enclosure
             attribute: url
+            priority: 0
       - !config.XmlConfigField
         name: file_size
         rules:
           - !config.XmlConfigRule
             path: ./content
             attribute: fileSize
+            priority: 0
           - !config.XmlConfigRule
             path: ./enclosure
             attribute: length
+            priority: 0
       - !config.XmlConfigField
         name: file_type
         rules:
           - !config.XmlConfigRule
             path: ./content
             attribute: type
+            priority: 0
           - !config.XmlConfigRule
             path: ./enclosure
             attribute: type
+            priority: 0

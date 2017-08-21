@@ -8,19 +8,23 @@ nodes:
         rules:
           - !config.XmlConfigRule
             path: title
+            priority: 0
       - !config.XmlConfigField
         name: field2
         rules:
           - !config.XmlConfigRule
             path: description
             attribute: value
+            priority: 0
       - !config.XmlConfigField
         name: field3
         rules:
           - !config.XmlConfigRule
             path: lastPubDate
+            priority: 0
           - !config.XmlConfigRule
             path: lastBuildDate
+            priority: 1
   - !config.XmlConfigNode
     name: SubItem
     basePath: /rss/channel/item
@@ -30,3 +34,4 @@ nodes:
         rules:
           - !config.XmlConfigRule
             path: title
+            priority: 0

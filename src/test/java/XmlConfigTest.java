@@ -46,6 +46,7 @@ public class XmlConfigTest {
         XmlConfigRule actual = xmlConfigField.rules.get(0);
         assertEquals("description", actual.path);
         assertEquals("value", actual.attribute);
+        assertEquals(new Integer(0), actual.priority);
     }
 
 }
